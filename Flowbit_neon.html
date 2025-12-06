@@ -1,0 +1,879 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Flowbit Neon — Local</title>
+<link rel="icon" href="data:,">
+<style>
+  /* ---------------------------
+     NEON THEME — modern & sleek
+     All UI lives in this single file
+     --------------------------- */
+  :root{
+    --bg:#05080b;
+    --panel:#07121a;
+    --muted:#9aa7b2;
+    --glass: rgba(255,255,255,0.03);
+    --accent-cyan: #6ef0ff;
+    --accent-purple: #c58bff;
+    --accent-pink: #ff6ec7;
+    --accent-green: #7effa1;
+    --card-glow: 0 6px 30px rgba(124,247,255,0.06);
+    --radius:14px;
+    --ui-gap:14px;
+  }
+  .light {
+    --bg:#f5f8fb; --panel:#ffffff; --muted:#51606a; --glass: rgba(0,0,0,0.04);
+    --accent-cyan:#3db5ff; --accent-purple:#8c6bff; --accent-pink:#ff6ea8; --accent-green:#36c77f;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;color: #e6f6ff;background: radial-gradient(600px 300px at 10% 10%, rgba(110,240,255,0.04), transparent), radial-gradient(600px 300px at 90% 90%, rgba(197,139,255,0.02), transparent), var(--bg); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;}
+  .app {
+    max-width:1200px; margin:18px auto; padding:18px; display:grid; grid-template-columns: 320px 1fr 360px; gap:18px;
+  }
+
+  /* Header */
+  header { grid-column:1 / -1; display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:4px; }
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent-cyan),var(--accent-purple));box-shadow:var(--card-glow);display:flex;align-items:center;justify-content:center;font-weight:800;color:#021018}
+  h1{font-size:20px;color:var(--accent-cyan);margin:0;text-shadow:0 4px 20px rgba(0,0,0,0.25)}
+  .header-actions{display:flex;gap:8px;align-items:center}
+
+  /* Panels */
+  .panel {
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius: var(--radius); padding:16px; border:1px solid rgba(255,255,255,0.03);
+    box-shadow: var(--card-glow);
+  }
+  .small{font-size:13px;color:var(--muted);margin-bottom:8px;display:block}
+  .muted{color:var(--muted);font-size:13px}
+
+  /* Left column */
+  .left-col .add {
+    display:flex;gap:8px;align-items:center;margin-bottom:10px;
+  }
+  .input{
+    width:100%;padding:10px;border-radius:10px;border:none;background:rgba(255,255,255,0.02);color:inherit;outline:none;
+  }
+  .btn{
+    background:linear-gradient(90deg,var(--accent-cyan),var(--accent-purple));
+    border:none;padding:10px 12px;border-radius:10px;color:#021018;font-weight:700;cursor:pointer;
+    box-shadow: 0 8px 20px rgba(124,247,255,0.05);
+  }
+  .ghost {
+    background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px 10px;border-radius:10px;color:var(--muted);cursor:pointer;
+  }
+
+  /* Habit card list */
+  .habit-list{display:flex;flex-direction:column;gap:12px;max-height:62vh;overflow:auto;padding-right:6px}
+  .habit {
+    display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border:1px solid rgba(255,255,255,0.02);
+  }
+  .ring {
+    width:66px;height:66px;flex:0 0 66px;display:flex;align-items:center;justify-content:center;position:relative;
+  }
+  .ring svg { transform:rotate(-90deg); }
+  .ring .center {
+    position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    font-weight:700;font-size:12px;color:var(--muted);
+  }
+  .habit-body{flex:1}
+  .habit-title{font-weight:700;font-size:15px}
+  .habit-sub{font-size:12px;color:var(--muted);margin-top:4px}
+  .habit-actions{display:flex;flex-direction:column;gap:8px}
+  .icon-btn{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:16px}
+
+  /* center column: main workspace */
+  .center-main{display:flex;flex-direction:column;gap:14px;min-height:60vh}
+  .card-large{padding:16px;border-radius:12px}
+
+  /* Heatmap */
+  .heatmap{display:grid;grid-template-columns:repeat(14,1fr);gap:6px}
+  .heat-cell{height:28px;border-radius:6px;cursor:pointer;border:1px solid rgba(255,255,255,0.02);display:flex;align-items:center;justify-content:center;font-size:11px;color:rgba(255,255,255,0.12)}
+  .heat-legend{display:flex;gap:8px;align-items:center;margin-top:8px}
+
+  /* Right column: stats & suggestions */
+  .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  canvas{width:100%;height:160px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));}
+
+  /* Tasks */
+  .tasks{margin-top:8px;display:flex;flex-direction:column;gap:6px}
+  .task{display:flex;gap:8px;align-items:center;padding:8px;border-radius:8px;background:rgba(255,255,255,0.01);border:1px solid rgba(255,255,255,0.02)}
+  .task input[type="text"]{flex:1;border:none;background:transparent;color:inherit;outline:none;padding:6px;font-size:14px}
+
+  /* Modal */
+  .modal { position: fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.5); z-index:40; }
+  .modal-panel{ width:92%; max-width:720px; background:var(--panel); border-radius:12px; padding:16px; box-shadow: 0 12px 40px rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.03) }
+
+  /* Settings row */
+  .row{display:flex;gap:8px;align-items:center}
+  .chip{padding:8px 10px;border-radius:999px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);cursor:pointer}
+
+  /* small screens */
+  @media (max-width:1000px){
+    .app{grid-template-columns:1fr; padding-bottom:60px}
+    header{flex-direction:column;align-items:flex-start;gap:6px}
+    .panel{margin-bottom:8px}
+  }
+</style>
+</head>
+<body>
+  <div id="root" class="app">
+    <header>
+      <div class="brand">
+        <div class="logo">FH</div>
+        <div>
+          <h1>Flowbit Neon</h1>
+          <div class="muted">local habit tracker — by Dhanwanth</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="toggleTheme" class="ghost" title="Toggle theme">Toggle Theme</button>
+        <button id="exportBtn" class="ghost" title="Export data">Export</button>
+        <button id="importBtn" class="ghost" title="Import data">Import</button>
+        <button id="resetBtn" class="ghost" title="Reset all">Reset</button>
+      </div>
+    </header>
+
+    <!-- LEFT: add / quick -->
+    <section class="panel left-col">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div>
+          <label class="small">Add a new habit</label>
+          <div class="left-col add">
+            <input id="habitName" class="input" placeholder="e.g., Drink water, Read 10 min" />
+            <button id="addHabit" class="btn">Add</button>
+          </div>
+        </div>
+
+        <div>
+          <label class="small">Quick actions</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button id="seedBtn" class="chip">Seed demo</button>
+            <button id="suggestBtn" class="chip">AI Suggest</button>
+            <button id="quoteBtn" class="chip">New Quote</button>
+            <button id="todayQuick" class="chip">Mark all today</button>
+          </div>
+        </div>
+
+        <div style="margin-top:10px">
+          <label class="small">Today’s motivational quote</label>
+          <div id="quoteBox" class="panel card-large" style="padding:12px;border-radius:10px;background:linear-gradient(90deg, rgba(110,240,255,0.035), rgba(197,139,255,0.03));">
+            <div id="quoteText" class="muted">Loading...</div>
+            <div style="margin-top:8px;text-align:right"><span id="quoteAuthor" class="muted"></span></div>
+          </div>
+        </div>
+
+        <div style="margin-top:10px">
+          <label class="small">Suggested habits (AI)</label>
+          <div id="suggestions" style="display:flex;flex-direction:column;gap:8px"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- CENTER: habits + heatmap -->
+    <main class="center-main">
+      <div class="panel card-large">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div class="small">Today</div>
+            <div style="font-weight:800">Your habits</div>
+          </div>
+          <div class="row">
+            <div class="muted" id="streakSummary">— streaks</div>
+          </div>
+        </div>
+
+        <div id="habitList" class="habit-list" style="margin-top:12px"></div>
+      </div>
+
+      <div class="panel card-large">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><div class="small">Streak Heatmap</div><div style="font-weight:800">Last 90 days</div></div>
+          <div class="muted">Click a day to edit</div>
+        </div>
+        <div id="heatmapWrap" style="margin-top:12px">
+          <div id="heatmap" class="heatmap"></div>
+          <div class="heat-legend">
+            <div class="muted">Less</div>
+            <div style="width:22px;height:12px;border-radius:4px;background:rgba(255,255,255,0.03)"></div>
+            <div style="width:22px;height:12px;border-radius:4px;background:linear-gradient(90deg,var(--accent-cyan),var(--accent-purple))"></div>
+            <div class="muted">More</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- RIGHT: charts, history, mood -->
+    <aside class="panel">
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><div class="small">Analytics</div><div style="font-weight:800">Charts</div></div>
+          <div class="muted">Last 30 days</div>
+        </div>
+
+        <div style="margin-top:10px" class="stats-grid">
+          <canvas id="chartHabits"></canvas>
+          <canvas id="chartMood"></canvas>
+        </div>
+
+        <div style="margin-top:12px">
+          <div class="small">Mood tracker</div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="chip mood-btn" data-mood="1">😭</button>
+            <button class="chip mood-btn" data-mood="2">😟</button>
+            <button class="chip mood-btn" data-mood="3">😐</button>
+            <button class="chip mood-btn" data-mood="4">🙂</button>
+            <button class="chip mood-btn" data-mood="5">🤩</button>
+          </div>
+        </div>
+
+        <div style="margin-top:12px">
+          <div class="small">History / Edit</div>
+          <div id="historyList" style="display:flex;flex-direction:column;gap:8px;margin-top:8px;max-height:220px;overflow:auto"></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Modal: Edit Day -->
+  <div id="modal" class="modal" aria-hidden="true">
+    <div class="modal-panel">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><h3 id="modalTitle">Edit Day</h3><div class="muted" id="modalDate">Date</div></div>
+        <div><button id="closeModal" class="ghost">Close</button></div>
+      </div>
+
+      <div style="margin-top:12px">
+        <label class="small">Which habits completed on this day?</label>
+        <div id="modalHabits" style="display:flex;flex-direction:column;gap:8px"></div>
+
+        <div style="margin-top:12px">
+          <label class="small">Mood (optional)</label>
+          <div style="display:flex;gap:8px">
+            <button class="chip modal-mood" data-mood="1">😭</button>
+            <button class="chip modal-mood" data-mood="2">😟</button>
+            <button class="chip modal-mood" data-mood="3">😐</button>
+            <button class="chip modal-mood" data-mood="4">🙂</button>
+            <button class="chip modal-mood" data-mood="5">🤩</button>
+            <input id="modalNote" class="input" placeholder="Add a note..." style="margin-left:8px" />
+          </div>
+        </div>
+
+        <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">
+          <button id="saveModal" class="btn">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/*
+  FlowHabit Neon - Local Single File
+  Features implemented:
+  - LocalStorage full persistence
+  - Add/delete habits
+  - Tasks inside habits (subtasks)
+  - Animated SVG progress rings
+  - Daily check-in with mood logging
+  - Heatmap for last 90 days (per-habit aggregated)
+  - Charts: habit completion rate + mood trend (canvas)
+  - AI local suggestions (rule-based)
+  - Motivational quotes (daily + refresh)
+  - Editable day history modal (edit past check-ins & mood)
+  - Export/import JSON
+  - Theme toggle (dark/light)
+*/
+
+// ---------- Utilities ----------
+const qs = s => document.querySelector(s);
+const qsa = s => Array.from(document.querySelectorAll(s));
+const LSKEY = 'flowhabit_neon_local_v1';
+
+function uid(){ return 'id_'+Math.random().toString(36).slice(2,9); }
+function todayISO(offset=0){
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  return d.toISOString().slice(0,10);
+}
+function daysAgoISO(n){ const d = new Date(); d.setDate(d.getDate()-n); return d.toISOString().slice(0,10); }
+function readJSON(k, def){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch(e){ return def; } }
+function writeJSON(k,v){ localStorage.setItem(k, JSON.stringify(v)); }
+
+// ---------- App State ----------
+let state = {
+  habits: [], // {id,name,color,streak,lastCheck,tasks: [{id,text,done}], history: {date: {doneHabits:[], mood:1..5, notes: "", tasksState: {habitId: [taskIds...]}}}}
+  settings: { theme: 'dark', accent: 'cyan' },
+  quotes: [],
+  suggestions: [],
+  ui: { modalDate: null }
+};
+
+// ---------- Init & Persistence ----------
+function load(){
+  const saved = readJSON(LSKEY, null);
+  if(saved) state = saved;
+  // migrations & defaults
+  state.habits = state.habits || [];
+  state.settings = state.settings || {theme:'dark', accent:'cyan'};
+  state.quotes = state.quotes || defaultQuotes();
+  writeJSON(LSKEY, state);
+}
+function save(){
+  writeJSON(LSKEY, state);
+  renderAll();
+}
+
+// ---------- Default Quotes ----------
+function defaultQuotes(){
+  return [
+    {q:"Small progress is still progress. Keep going.", a:"— Unknown"},
+    {q:"Focus on the next step, not the whole journey.", a:"— Anonymous"},
+    {q:"You don’t have to be perfect, just consistent.", a:"— James Clear"},
+    {q:"Do something today that your future self will thank you for.", a:"— Sean Patrick Flanery"},
+    {q:"Habits are the compound interest of self-improvement.", a:"— James Clear"}
+  ];
+}
+
+// ---------- Rendering ----------
+const habitListEl = qs('#habitList');
+const suggestionsEl = qs('#suggestions');
+const quoteText = qs('#quoteText');
+const quoteAuthor = qs('#quoteAuthor');
+const quoteBtn = qs('#quoteBtn');
+const seedBtn = qs('#seedBtn');
+const suggestBtn = qs('#suggestBtn');
+const streakSummary = qs('#streakSummary');
+const heatmapEl = qs('#heatmap');
+const chartHabits = qs('#chartHabits');
+const chartMood = qs('#chartMood');
+const historyList = qs('#historyList');
+
+function renderAll(){
+  renderQuote();
+  renderSuggestions();
+  renderHabits();
+  renderHeatmap();
+  drawCharts();
+  renderHistory();
+  applyTheme();
+}
+function applyTheme(){
+  const root = document.getElementById('root');
+  if(state.settings.theme === 'light') root.classList.add('light'); else root.classList.remove('light');
+}
+
+// Render Quote
+function renderQuote(){
+  const arr = state.quotes;
+  if(!arr || arr.length===0) { quoteText.textContent = ''; quoteAuthor.textContent=''; return; }
+  const idx = writeJSON('_quote_idx', readJSON('_quote_idx', Math.floor(Math.random()*arr.length))); // not critical
+  // choose daily: based on date
+  const day = new Date().toISOString().slice(0,10);
+  let dailyIndex = readJSON('_daily_quote_index_'+day, null);
+  if(dailyIndex === null){
+    dailyIndex = Math.floor(Math.random()*arr.length);
+    writeJSON('_daily_quote_index_'+day, dailyIndex);
+  }
+  const q = arr[dailyIndex];
+  quoteText.textContent = q.q;
+  quoteAuthor.textContent = q.a || '';
+}
+
+// AI Suggestions (local rule-based)
+function makeAISuggestions(){
+  const suggestions = [];
+  const total = state.habits.length;
+  const lowStreaks = state.habits.filter(h => (h.streak||0) < 3).slice(0,3).map(h=>h.name);
+  if(total < 3){
+    suggestions.push("Start with tiny habits — 2 minutes or 1 repetition. Try 'Read 5 pages' or '2-minute stretch'.");
+  }
+  if(lowStreaks.length){
+    suggestions.push("Simplify habits you've been missing: " + lowStreaks.join(", ") + " → break them into micro-tasks.");
+  }
+  // mood-based suggestion: if recent moods low
+  const moods = lastNMoodEntries(14);
+  const avgMood = moods.length ? (moods.reduce((a,b)=>a+b,0)/moods.length) : 3;
+  if(avgMood <= 2.8){
+    suggestions.push("Mood seems low lately. Consider gentle wellness habits: short walk, deep-breathing, or a gratitude note.");
+  }
+  if(!suggestions.length) suggestions.push("Try adding a 'Daily Reflection' habit or a small reward when you hit a 7-day streak.");
+  state.suggestions = suggestions;
+}
+
+// Render suggestions
+function renderSuggestions(){
+  makeAISuggestions();
+  suggestionsEl.innerHTML = '';
+  state.suggestions.forEach(s=>{
+    const d = document.createElement('div');
+    d.className = 'panel';
+    d.style.padding = '10px';
+    d.style.borderRadius = '8px';
+    d.textContent = s;
+    suggestionsEl.appendChild(d);
+  });
+}
+
+// Render Habits
+function renderHabits(){
+  habitListEl.innerHTML = '';
+  const now = todayISO();
+  // sort: by streak desc
+  const list = state.habits.slice().sort((a,b)=> (b.streak||0) - (a.streak||0));
+  list.forEach(h=>{
+    const el = document.createElement('div'); el.className='habit';
+    // ring svg
+    const ring = document.createElement('div'); ring.className='ring';
+    ring.innerHTML = buildRingSVG(h);
+    const body = document.createElement('div'); body.className='habit-body';
+    const title = document.createElement('div'); title.className='habit-title'; title.textContent = h.name;
+    const sub = document.createElement('div'); sub.className='habit-sub';
+    const last = h.history && h.history[now] && h.history[now].doneHabits && h.history[now].doneHabits.includes(h.id) ? 'Done today' : 'Not done today';
+    sub.textContent = `${h.tasks ? h.tasks.filter(t=>t.done).length : 0}/${(h.tasks||[]).length} tasks • ${h.streak||0} day streak • ${last}`;
+    body.appendChild(title); body.appendChild(sub);
+
+    const actions = document.createElement('div'); actions.className='habit-actions';
+    const checkBtn = document.createElement('button'); checkBtn.className='icon-btn'; checkBtn.innerHTML='✔'; checkBtn.title='Check-in';
+    checkBtn.onclick = ()=> openCheckIn(h.id);
+    const editBtn = document.createElement('button'); editBtn.className='icon-btn'; editBtn.innerHTML='✏️'; editBtn.title='Edit';
+    editBtn.onclick = ()=> openEditHabit(h.id);
+    const delBtn = document.createElement('button'); delBtn.className='icon-btn'; delBtn.innerHTML='🗑️'; delBtn.title='Delete';
+    delBtn.onclick = ()=> { if(confirm('Delete this habit?')) { state.habits = state.habits.filter(x=>x.id!==h.id); save(); } };
+    actions.appendChild(checkBtn); actions.appendChild(editBtn); actions.appendChild(delBtn);
+
+    // tasks preview
+    const tasksWrap = document.createElement('div'); tasksWrap.className='tasks';
+    (h.tasks||[]).forEach(t=>{
+      const tEl = document.createElement('div'); tEl.className='task';
+      const cb = document.createElement('input'); cb.type='checkbox'; cb.checked = !!t.done;
+      cb.onchange = () => { t.done = cb.checked; save(); };
+      const txt = document.createElement('div'); txt.textContent = t.text; txt.style.opacity = t.done ? 0.6 : 1;
+      tEl.appendChild(cb); tEl.appendChild(txt); tasksWrap.appendChild(tEl);
+    });
+
+    el.appendChild(ring); el.appendChild(body); el.appendChild(actions);
+    if(h.tasks && h.tasks.length) el.appendChild(tasksWrap);
+    habitListEl.appendChild(el);
+  });
+
+  // streak summary
+  const activeStreaks = state.habits.filter(h => (h.streak||0) >= 3).length;
+  streakSummary.textContent = `${activeStreaks} habits with 3+ day streaks`;
+}
+
+// Build animated SVG ring (progress by today's tasks completion)
+function buildRingSVG(h){
+  const size = 66;
+  const stroke = 8;
+  const radius = (size - stroke) / 2;
+  // compute progress: tasks completion or binary habit done
+  const today = todayISO();
+  const hist = (h.history && h.history[today]) || null;
+  let progress = 0;
+  if(h.tasks && h.tasks.length){
+    const doneCount = h.tasks.filter(t=>t.done).length;
+    progress = h.tasks.length ? (doneCount / h.tasks.length) : 0;
+  } else {
+    progress = hist && hist.doneHabits && hist.doneHabits.includes(h.id) ? 1 : 0;
+  }
+  const circumference = 2 * Math.PI * radius;
+  const offset = Math.round(circumference * (1 - progress));
+  const color = progress === 1 ? 'var(--accent-green)' : (progress >= 0.5 ? 'var(--accent-cyan)' : 'rgba(255,255,255,0.06)');
+  const emoji = (hist && hist.mood) ? moodEmojiFor(hist.mood) : '●';
+  return `
+    <svg width="${size}" height="${size}">
+      <defs>
+        <linearGradient id="g_${h.id}" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="var(--accent-cyan)"/>
+          <stop offset="100%" stop-color="var(--accent-purple)"/>
+        </linearGradient>
+      </defs>
+      <circle cx="${size/2}" cy="${size/2}" r="${radius}" stroke="rgba(255,255,255,0.03)" stroke-width="${stroke}" fill="transparent"/>
+      <circle cx="${size/2}" cy="${size/2}" r="${radius}" stroke="url(#g_${h.id})" stroke-width="${stroke}" stroke-dasharray="${circumference}" stroke-dashoffset="${offset}" stroke-linecap="round" fill="transparent" style="transition: stroke-dashoffset 600ms ease, stroke 300ms ease; filter: drop-shadow(0 6px 18px rgba(124,247,255,0.04));"/>
+    </svg>
+    <div class="center">${Math.round(progress*100)}%</div>
+  `;
+}
+function moodEmojiFor(m){
+  if(!m) return '●';
+  if(m===1) return '😭';
+  if(m===2) return '😟';
+  if(m===3) return '😐';
+  if(m===4) return '🙂';
+  return '🤩';
+}
+
+// ---------- Check-in Flow ----------
+function openCheckIn(habitId){
+  // show a small prompt: choose mood, optional note, and optionally mark tasks
+  // For simplicity use prompt dialogs (could be replaced with a nicer modal)
+  const mood = parseInt(prompt("Rate your mood (1 sad - 5 ecstatic). Leave empty to skip:","4"));
+  const note = prompt("Add a quick note (optional):","") || "";
+  const date = todayISO();
+  const habit = state.habits.find(h=>h.id===habitId);
+  if(!habit) return;
+  // mark done
+  habit.history = habit.history || {};
+  habit.history[date] = habit.history[date] || { doneHabits: [], mood: null, notes: "" };
+  if(!habit.history[date].doneHabits.includes(habitId)) habit.history[date].doneHabits.push(habitId);
+  if(mood >=1 && mood <=5) habit.history[date].mood = mood;
+  if(note) habit.history[date].notes = note;
+  // if tasks exist, prompt to mark tasks
+  if(habit.tasks && habit.tasks.length){
+    // quick confirm marking all tasks done?
+    const markAll = confirm("Mark all subtasks as done for this check-in?");
+    if(markAll){
+      habit.tasks.forEach(t=>t.done = true);
+    }
+  }
+  // update streak: if yesterday done then streak+1 else 1
+  const yesterday = daysAgoISO(1);
+  const hadYesterday = habit.history && habit.history[yesterday] && habit.history[yesterday].doneHabits && habit.history[yesterday].doneHabits.includes(habitId);
+  habit.streak = (hadYesterday ? (habit.streak||0)+1 : 1);
+  habit.lastCheck = date;
+  save();
+  // confetti-like neon pulse
+  neonPulse();
+}
+
+function neonPulse(){
+  document.body.animate([{filter:'brightness(1.05)'},{filter:'brightness(1)'}],{duration:450, easing:'ease-out'});
+}
+
+// ---------- Edit Habit Modal ----------
+function openEditHabit(habitId){
+  const h = state.habits.find(x=>x.id===habitId);
+  if(!h) return;
+  const newName = prompt("Edit habit name:", h.name);
+  if(newName === null) return;
+  h.name = newName.trim() || h.name;
+  // edit tasks
+  if(confirm("Edit subtasks?")) {
+    // simple comma-separated edit
+    const tnames = (h.tasks||[]).map(t=>t.text).join(',');
+    const updated = prompt("Edit tasks as comma-separated list (leave empty for none):", tnames);
+    if(updated !== null){
+      const arr = updated.split(',').map(s=>s.trim()).filter(s=>s);
+      h.tasks = arr.map(txt=> ({ id: uid(), text: txt, done: false }) );
+    }
+  }
+  save();
+}
+
+// ---------- Heatmap (90 days) ----------
+function renderHeatmap(){
+  heatmapEl.innerHTML = '';
+  const days = 90;
+  // grid 14 columns x 7 rows roughly -> we will make 90 cells
+  for(let i=days-1;i>=0;i--){
+    const dISO = daysAgoISO(i);
+    const cell = document.createElement('div'); cell.className='heat-cell';
+    const agg = aggregateDay(dISO);
+    // determine intensity 0..1 by number of habits done / total habits
+    const totalHabits = state.habits.length || 1;
+    const intensity = agg.count / totalHabits;
+    // color mapping: low -> transparent, high -> neon
+    if(intensity >= 0.75) cell.style.background = 'linear-gradient(90deg,var(--accent-cyan),var(--accent-purple))';
+    else if(intensity >= 0.4) cell.style.background = 'linear-gradient(90deg, rgba(124,247,255,0.12), rgba(197,139,255,0.08))';
+    else cell.style.background = 'rgba(255,255,255,0.02)';
+    cell.title = `${dISO}: ${agg.count} / ${totalHabits} habits done. Mood: ${agg.mood||'—'}`;
+    cell.textContent = dISO.slice(5); // mm-dd
+    cell.onclick = ()=> openDayModal(dISO);
+    heatmapEl.appendChild(cell);
+  }
+}
+function aggregateDay(dateISO){
+  let count = 0; let mood = null;
+  state.habits.forEach(h=>{
+    if(h.history && h.history[dateISO] && h.history[dateISO].doneHabits && h.history[dateISO].doneHabits.includes(h.id)){
+      count++;
+      if(h.history[dateISO].mood) mood = h.history[dateISO].mood;
+    }
+  });
+  return {count,mood};
+}
+
+// ---------- Day Modal (edit) ----------
+const modal = qs('#modal'); const modalHabits = qs('#modalHabits'); const modalDateEl = qs('#modalDate'); const modalTitle = qs('#modalTitle');
+let modalEditingDate = null;
+function openDayModal(dateISO){
+  modalEditingDate = dateISO;
+  modalDateEl.textContent = dateISO;
+  modalTitle.textContent = `Edit ${dateISO}`;
+  modalHabits.innerHTML = '';
+  // list all habits with checkbox (done)
+  state.habits.forEach(h=>{
+    const id = 'mcb_' + h.id;
+    const div = document.createElement('div'); div.style.display='flex'; div.style.alignItems='center'; div.style.gap='8px';
+    const cb = document.createElement('input'); cb.type='checkbox'; cb.id = id;
+    const entry = h.history && h.history[dateISO] && h.history[dateISO].doneHabits && h.history[dateISO].doneHabits.includes(h.id);
+    cb.checked = !!entry;
+    const label = document.createElement('label'); label.textContent = h.name; label.htmlFor = id;
+    div.appendChild(cb); div.appendChild(label);
+    modalHabits.appendChild(div);
+  });
+  // mood
+  // show current mood if any - find first mood across habits
+  const currentMood = (()=> {
+    for(const h of state.habits){
+      if(h.history && h.history[dateISO] && h.history[dateISO].mood) return h.history[dateISO].mood;
+    }
+    return null;
+  })();
+  qsa('.modal-mood').forEach(b=> { b.classList.remove('active'); if(Number(b.dataset.mood) === currentMood) b.classList.add('active'); });
+  qs('#modalNote').value = (() => {
+    for(const h of state.habits){ if(h.history && h.history[dateISO] && h.history[dateISO].notes) return h.history[dateISO].notes; }
+    return '';
+  })();
+
+  modal.style.display = 'flex';
+  modal.setAttribute('aria-hidden','false');
+}
+
+qs('#closeModal').onclick = ()=> closeModal();
+function closeModal(){ modal.style.display='none'; modal.setAttribute('aria-hidden','true'); modalEditingDate = null; }
+
+qs('#saveModal').onclick = ()=>{
+  if(!modalEditingDate) return;
+  // read checkboxes
+  state.habits.forEach(h=>{
+    const cb = qs('#mcb_' + h.id);
+    if(!cb) return;
+    const checked = cb.checked;
+    h.history = h.history || {};
+    h.history[modalEditingDate] = h.history[modalEditingDate] || {doneHabits:[], mood:null, notes:''};
+    const arr = h.history[modalEditingDate].doneHabits || [];
+    const has = arr.includes(h.id);
+    if(checked && !has) arr.push(h.id);
+    if(!checked && has) {
+      h.history[modalEditingDate].doneHabits = arr.filter(x=>x!==h.id);
+    } else h.history[modalEditingDate].doneHabits = arr;
+  });
+  // mood
+  const moodActive = qsa('.modal-mood.active')[0];
+  const moodVal = moodActive ? Number(moodActive.dataset.mood) : null;
+  // write mood/notes into first habit entry's history object so we have a place to store them
+  for(const h of state.habits){
+    h.history = h.history || {};
+    h.history[modalEditingDate] = h.history[modalEditingDate] || {doneHabits:[], mood:null, notes:''};
+    if(moodVal) h.history[modalEditingDate].mood = moodVal;
+    const note = qs('#modalNote').value.trim();
+    if(note) h.history[modalEditingDate].notes = note;
+  }
+  save();
+  closeModal();
+};
+
+// modal mood selection
+qsa('.modal-mood').forEach(b=>{
+  b.onclick = ()=> {
+    qsa('.modal-mood').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+  };
+});
+
+// ---------- Charts: simple canvas charts ----------
+function drawCharts(){
+  drawHabitsChart();
+  drawMoodChart();
+}
+function drawHabitsChart(){
+  const c = chartHabits; const ctx = c.getContext('2d');
+  c.width = c.clientWidth; c.height = 160;
+  ctx.clearRect(0,0,c.width,c.height);
+  // last 30 days counts
+  const days = 30;
+  const labels = []; const values = [];
+  for(let i=days-1;i>=0;i--){
+    const d = daysAgoISO(i);
+    const agg = aggregateDay(d);
+    labels.push(d.slice(5));
+    values.push(agg.count);
+  }
+  // draw area
+  const max = Math.max(1, ...values);
+  ctx.beginPath();
+  values.forEach((v,i)=>{
+    const x = i*(c.width/ (days-1));
+    const y = c.height - (v/max) * (c.height - 20);
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(124,247,255,0.9)'; ctx.stroke();
+  // fill gradient
+  const grad = ctx.createLinearGradient(0,0,0,c.height);
+  grad.addColorStop(0,'rgba(124,247,255,0.18)');
+  grad.addColorStop(1,'rgba(124,247,255,0.02)');
+  ctx.lineTo(c.width, c.height); ctx.lineTo(0,c.height); ctx.closePath();
+  ctx.fillStyle = grad; ctx.fill();
+}
+function drawMoodChart(){
+  const c = chartMood; const ctx = c.getContext('2d');
+  c.width = c.clientWidth; c.height = 160;
+  ctx.clearRect(0,0,c.width,c.height);
+  // average mood per day for last 30 days
+  const days = 30;
+  const values = [];
+  for(let i=days-1;i>=0;i--){
+    const d = daysAgoISO(i);
+    // average moods across habits
+    let sum = 0; let cnt = 0;
+    state.habits.forEach(h=>{
+      if(h.history && h.history[d] && h.history[d].mood){ sum += h.history[d].mood; cnt++; }
+    });
+    values.push(cnt ? (sum/cnt) : null);
+  }
+  // draw line skipping nulls
+  ctx.beginPath();
+  let started=false;
+  values.forEach((v,i)=>{
+    const x = i*(c.width/(days-1));
+    const y = v ? c.height - ((v-1)/4)*(c.height-20) : null;
+    if(v !== null){
+      if(!started){ ctx.moveTo(x,y); started=true; } else ctx.lineTo(x,y);
+    } else { started=false; }
+  });
+  ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(198,139,255,0.95)'; ctx.stroke();
+}
+
+// ---------- History list (recent edits) ----------
+function renderHistory(){
+  historyList.innerHTML = '';
+  // collect last 30 recorded days
+  const dag = {};
+  state.habits.forEach(h=>{
+    for(const [d,entry] of Object.entries(h.history || {})){
+      if(!dag[d]) dag[d] = {date:d, notes: entry.notes || '', mood: entry.mood || null, count:0};
+      if(entry.doneHabits && entry.doneHabits.includes(h.id)) dag[d].count++;
+      if(entry.mood) dag[d].mood = entry.mood;
+    }
+  });
+  const arr = Object.values(dag).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,20);
+  arr.forEach(item=>{
+    const div = document.createElement('div'); div.style.display='flex'; div.style.justifyContent='space-between'; div.style.alignItems='center';
+    const left = document.createElement('div'); left.innerHTML = `<div style="font-weight:700">${item.date}</div><div class="muted">${item.count} habits • mood: ${item.mood || '—'}</div>`;
+    const right = document.createElement('div');
+    const eBtn = document.createElement('button'); eBtn.className='chip'; eBtn.textContent='Edit'; eBtn.onclick = ()=> openDayModal(item.date);
+    right.appendChild(eBtn);
+    div.appendChild(left); div.appendChild(right);
+    historyList.appendChild(div);
+  });
+}
+
+// ---------- CRUD: Add habit, seed demo, export/import, reset ----------
+qs('#addHabit').onclick = ()=> {
+  const name = qs('#habitName').value.trim();
+  if(!name) return alert('Enter a habit name');
+  const newHabit = { id: uid(), name, color: null, streak:0, lastCheck:'', tasks: [], history: {} };
+  state.habits.push(newHabit);
+  qs('#habitName').value = '';
+  save();
+};
+qs('#seedBtn').onclick = seedDemo;
+function seedDemo(){
+  state.habits = [
+    { id: uid(), name: 'Drink water', streak:3, lastCheck: todayISO(), tasks:[{id:uid(),text:'Glass 1',done:true},{id:uid(),text:'Glass 2',done:true}], history:{} },
+    { id: uid(), name: 'Read 10 min', streak:1, lastCheck:'', tasks:[], history:{} },
+    { id: uid(), name: 'Stretch 5 min', streak:0, lastCheck:'', tasks:[], history:{} }
+  ];
+  // mark some history
+  state.habits.forEach((h,idx)=>{
+    const d = daysAgoISO(idx);
+    h.history[d] = { doneHabits: [h.id], mood: 3 + (idx%3), notes: '' };
+  });
+  save();
+}
+
+qs('#suggestBtn').onclick = ()=> { renderSuggestions(); alert('AI suggestions refreshed'); };
+qs('#quoteBtn').onclick = ()=> { // rotate quote
+  const arr = state.quotes;
+  const i = Math.floor(Math.random()*arr.length);
+  quoteText.textContent = arr[i].q; quoteAuthor.textContent = arr[i].a || '';
+};
+qs('#todayQuick').onclick = ()=> {
+  const date = todayISO();
+  state.habits.forEach(h=>{
+    h.history = h.history || {};
+    h.history[date] = h.history[date] || {doneHabits: [], mood:null, notes:''};
+    if(!h.history[date].doneHabits.includes(h.id)) h.history[date].doneHabits.push(h.id);
+    h.lastCheck = date; h.streak = (h.streak||0) + 1;
+  });
+  save();
+};
+
+qs('#exportBtn').onclick = ()=> {
+  const payload = JSON.stringify(state, null, 2);
+  const blob = new Blob([payload], {type:'application/json'}); const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='flowhabit_export.json'; a.click(); URL.revokeObjectURL(url);
+};
+qs('#importBtn').onclick = ()=> {
+  const inp = document.createElement('input'); inp.type='file'; inp.accept='application/json';
+  inp.onchange = e => {
+    const f = e.target.files[0]; if(!f) return;
+    const r = new FileReader();
+    r.onload = ev => {
+      try {
+        const parsed = JSON.parse(ev.target.result);
+        if(confirm('Replace current data with imported data?')) { state = parsed; save(); alert('Imported'); }
+      } catch(err){ alert('Invalid file'); }
+    };
+    r.readAsText(f);
+  };
+  inp.click();
+};
+qs('#resetBtn').onclick = ()=> { if(confirm('Reset all local data?')) { state = {habits:[],settings:state.settings,quotes:state.quotes||defaultQuotes()}; save(); } };
+
+// ---------- Mood quick buttons (right) ----------
+qsa('.mood-btn').forEach(b=>{
+  b.onclick = ()=> {
+    const mood = Number(b.dataset.mood);
+    // set today's mood across habits (store in each today's history)
+    const date = todayISO();
+    state.habits.forEach(h=>{
+      h.history = h.history || {};
+      h.history[date] = h.history[date] || {doneHabits: [], mood:null, notes:''};
+      h.history[date].mood = mood;
+    });
+    save();
+  };
+});
+
+// ---------- Modal quick close outside ----------
+modal.onclick = (e)=> { if(e.target === modal) closeModal(); };
+window.addEventListener('keydown', (e)=> { if(e.key === 'Escape') closeModal(); });
+
+// ---------- Theme toggle ----------
+qs('#toggleTheme').onclick = ()=> {
+  state.settings.theme = state.settings.theme === 'dark' ? 'light' : 'dark';
+  save();
+};
+
+// ---------- Simple local "AI" suggestions: implemented above in renderSuggestions ----------
+
+// ---------- Helpers: last N mood entries ----------
+function lastNMoodEntries(n){
+  const arr = [];
+  for(let i=0;i<n;i++){
+    const d = daysAgoISO(i);
+    for(const h of state.habits){
+      if(h.history && h.history[d] && h.history[d].mood) arr.push(h.history[d].mood);
+    }
+  }
+  return arr;
+}
+
+// ---------- On load ----------
+load();
+renderAll();
+
+// ---------- Periodic UI refresh for animations/gradients ----------
+setInterval(()=> {
+  // subtle update for rings (rebuild habit list)
+  renderHabits();
+}, 3000);
+</script>
+</body>
+</html>
